@@ -81,7 +81,7 @@
 
         async function fetchLocation(ip) {
             try {
-                const locationResponse = await fetch(`http://ip-api.com/json/${ip}`);
+                const locationResponse = await fetch(`https://ip-api.com/json/${ip}`);  // Changed to HTTPS
                 if (!locationResponse.ok) throw new Error('Failed to fetch location');
                 const locationData = await locationResponse.json();
                 if (locationData.status !== 'success') throw new Error('Invalid location data');
