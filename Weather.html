@@ -7,100 +7,109 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
+            background-color: #f4f4f4;
             color: #333;
-            text-align: center;
             margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 400px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            text-align: center;
         }
 
         h1 {
-            color: #444;
-            margin-bottom: 10px;
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            font-size: 18px;
+            line-height: 1.8;
+            margin: 20px auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .label {
             font-weight: bold;
-            color: #666;
+            margin-top: 10px;
+            color: #007bff;
         }
 
         .error {
             color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Weather Forecast</h1>
-    <h2>Your Location Weather and Tonight's Forecast</h2>
+    <h1>Weather Forecast for Tonight</h1>
+    <div class="container" id="output">
+        <p class="label">Location:</p>
+        <p id="location-result">Loading...</p>
 
-    <div class="container" id="info">
-        <p><span class="label">Current Location:</span></p>
-        <p id="location">Loading...</p>
-
-        <p><span class="label">Current Weather:</span></p>
-        <p id="current-weather">Loading...</p>
-
-        <p><span class="label">Tonight's Forecast:</span></p>
-        <p id="tonight-forecast">Loading...</p>
+        <p class="label">Tonight's Weather:</p>
+        <p id="weather-result">Loading...</p>
     </div>
 
     <script>
-        const locationElement = document.getElementById("location");
-        const currentWeatherElement = document.getElementById("current-weather");
-        const tonightForecastElement = document.getElementById("tonight-forecast");
+        const locationResult = document.getElementById("location-result");
+        const weatherResult = document.getElementById("weather-result");
 
-        async function fetchWeatherDetails() {
+        // Function to fetch the IP address and location using ipinfo.io API
+        async function fetchLocation() {
             try {
-                // Step 1: Fetch user's location and ISP details using IP
-                const ipResponse = await fetch('https://ipapi.co/json/');
-                if (!ipResponse.ok) throw new Error("Failed to fetch location details.");
-                const ipData = await ipResponse.json();
-
-                const city = ipData.city;
-                const country = ipData.country_name;
-                locationElement.textContent = `${city}, ${country}`;
-
-                // Step 2: Fetch current weather and tonight's forecast
-                const apiKey = "524a4e7dd19165afe1880c716e00b368"; // Replace with your OpenWeatherMap API key
-                const weatherUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city},${country}&units=metric&appid=${apiKey}`;
-                const weatherResponse = await fetch(weatherUrl);
-                if (!weatherResponse.ok) throw new Error("Failed to fetch weather data.");
-                const weatherData = await weatherResponse.json();
-
-                // Step 3: Extract current weather
-                const currentWeather = weatherData.list[0];
-                currentWeatherElement.textContent = `${currentWeather.weather[0].description}, ${currentWeather.main.temp}°C`;
-
-                // Step 4: Extract tonight's forecast (typically around 9:00 PM)
-                const tonightForecast = weatherData.list.find(item => {
-                    const forecastTime = new Date(item.dt * 1000).getHours();
-                    return forecastTime === 21; // 21:00 = 9:00 PM
-                });
-
-                if (tonightForecast) {
-                    tonightForecastElement.textContent = `${tonightForecast.weather[0].description}, ${tonightForecast.main.temp}°C`;
-                } else {
-                    tonightForecastElement.textContent = "Forecast for tonight is unavailable.";
-                }
+                const locationResponse = await fetch('https://ipinfo.io/json?token=c5335a33d468b6');
+                const locationData = await locationResponse.json();
+                locationResult.textContent = `${locationData.city}, ${locationData.country}`;
+                return locationData;
             } catch (error) {
-                console.error("Error fetching weather details:", error);
-                locationElement.textContent = "Error loading location.";
-                currentWeatherElement.textContent = "Error loading current weather.";
-                tonightForecastElement.textContent = "Error loading tonight's forecast.";
+                console.error("Error fetching location:", error);
+                locationResult.textContent = "Error fetching location";
+                throw error;
             }
         }
 
-        fetchWeatherDetails();
+        // Function to fetch tonight's weather using OpenWeatherMap API
+        async function fetchWeather(city, country) {
+            try {
+                const apiKey = '524a4e7dd19165afe1880c716e00b368'; // Replace with your OpenWeatherMap API key
+                const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city},${country}&units=metric&appid=${apiKey}`);
+                const weatherData = await weatherResponse.json();
+
+                // Get tonight's weather (forecast for 00:00)
+                const tonight = weatherData.list.find(item => {
+                    const date = new Date(item.dt * 1000);
+                    return date.getHours() === 0; // Find the forecast for midnight (tonight)
+                });
+
+                if (tonight) {
+                    weatherResult.textContent = `${tonight.weather[0].description}, ${tonight.main.temp}°C`;
+                } else {
+                    weatherResult.textContent = "Weather data not available for tonight.";
+                }
+            } catch (error) {
+                console.error("Error fetching weather:", error);
+                weatherResult.textContent = "Error fetching weather";
+            }
+        }
+
+        // Main function to fetch IP, location, and weather
+        async function main() {
+            try {
+                const locationData = await fetchLocation();
+                await fetchWeather(locationData.city, locationData.country);
+            } catch (error) {
+                console.error("Error in main function:", error);
+            }
+        }
+
+        // Run the main function
+        main();
     </script>
 </body>
 </html>
