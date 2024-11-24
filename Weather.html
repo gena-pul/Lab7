@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0; /* Remove default body margin */
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 {
+            background-color: rgb(205, 92, 92);
+            color: white;
+            padding: 20px;
+            margin: 0; /* Remove default margin */
+            border-top: 0; /* Prevent spacing above */
+            border-radius: 0; /* Remove rounded edges */
+        }
+
+         .container {
+            font-size: 18px;
+            line-height: 1.8;
+            margin: 20px auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+
+        .label {
+            font-weight: bold;
+            margin-top: 10px;
+            color: rgb(233, 150, 122);
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 24px;
+                padding: 15px;
+            }
+
+            .container {
+                font-size: 16px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Javascript and APIs</h1>
+	<h1><small>With basic knowledge of Javascript and APIs, I can find out the following: </small></h1>
+    <div class="container" id="output">
+        <p class="label">Public IP Address:</p>
+        <p id="ip-result">Loading...</p>
+
+        <p class="label">Location:</p>
+        <p id="location-result">Loading...</p>
+
+        <p class="label">Weather:</p>
+        <p id="weather-result">Loading...</p>
+    </div>
+
+    <script>
+        const ipResult = document.getElementById("ip-result");
+        const locationResult = document.getElementById("location-result");
+        const weatherResult = document.getElementById("weather-result");
+
+        // First API call: Get public IP address
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(ipData => {
+                const ip = ipData.ip;
+                ipResult.textContent = ip; // Update IP result
+
+                // Second API call: Get location from IP
+                return fetch(`http://ip-api.com/json/${ip}`);
+            })
+            .then(response => response.json())
+            .then(locationData => {
+                const city = locationData.city;
+                const country = locationData.country;
+
+                // Update location result
+                locationResult.textContent = `${city}, ${country}`;
+
+                // Third API call: Weather using IP-based location
+                const weatherApiKey = '524a4e7dd19165afe1880c716e00b368'; 
+                const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&units=metric&appid=${weatherApiKey}`;
+                
+                return fetch(weatherApiUrl);
+            })
+            .then(response => response.json())
+            .then(weatherData => {
+                const weatherDescription = weatherData.weather[0].description;
+
+                // Update weather result
+                weatherResult.textContent = weatherDescription;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const errorMessage = "An error occurred while fetching data. Check the console for details.";
+                ipResult.textContent = errorMessage;
+                locationResult.textContent = errorMessage;
+                weatherResult.textContent = errorMessage;
+            });
+    </script>
+</body>
+</html>
