@@ -81,7 +81,7 @@
 
         async function fetchLocation(ip) {
             try {
-                const locationResponse = await fetch(`https://pro.ip-api.com/json/${ip}?key=YOUR_IP_API_KEY`);
+                const locationResponse = await fetch(`https://pro.ip-api.com/json/${ip}?key=524a4e7dd19165afe1880c716e00b368`);
                 if (!locationResponse.ok) throw new Error('Failed to fetch location');
                 const locationData = await locationResponse.json();
                 if (locationData.status !== 'success') throw new Error('Invalid location data');
