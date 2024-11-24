@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
             font-family: 'Times New Roman', serif;
             background-color: #f0f4f8;
             color: #333;
-            margin: 0; /* Remove default body margin */
+            margin: 0;
             padding: 0;
             text-align: center;
         }
@@ -18,12 +18,10 @@
             background-color: rgb(205, 92, 92);
             color: white;
             padding: 20px;
-            margin: 0; /* Remove default margin */
-            border-top: 0; /* Prevent spacing above */
-            border-radius: 0; /* Remove rounded edges */
+            margin: 0;
         }
 
-         .container {
+        .container {
             font-size: 18px;
             line-height: 1.8;
             margin: 20px auto;
@@ -37,10 +35,8 @@
             text-align: center;
         }
 
-
         .label {
             font-weight: bold;
-            margin-top: 10px;
             color: rgb(233, 150, 122);
         }
 
@@ -48,24 +44,11 @@
             color: red;
             font-weight: bold;
         }
-
-        /* Responsive design */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 24px;
-                padding: 15px;
-            }
-
-            .container {
-                font-size: 16px;
-                padding: 15px;
-            }
-        }
     </style>
 </head>
 <body>
     <h1>Javascript and APIs</h1>
-	<h1><small>With basic knowledge of Javascript and APIs, I can find out the following: </small></h1>
+    <h2>With basic knowledge of Javascript and APIs, I can find out the following:</h2>
     <div class="container" id="output">
         <p class="label">Public IP Address:</p>
         <p id="ip-result">Loading...</p>
@@ -87,17 +70,16 @@
             .then(response => response.json())
             .then(ipData => {
                 const ip = ipData.ip;
-                ipResult.textContent = ip; // Update IP result
+                ipResult.textContent = ip;
 
                 // Second API call: Get location from IP
-                return fetch(`http://ip-api.com/json/${ip}`);
+                return fetch(`https://ip-api.com/json/${ip}`);
             })
             .then(response => response.json())
             .then(locationData => {
                 const city = locationData.city;
                 const country = locationData.country;
 
-                // Update location result
                 locationResult.textContent = `${city}, ${country}`;
 
                 // Third API call: Weather using IP-based location
@@ -108,17 +90,15 @@
             })
             .then(response => response.json())
             .then(weatherData => {
+                console.log(weatherData); // Debug API response
                 const weatherDescription = weatherData.weather[0].description;
-
-                // Update weather result
                 weatherResult.textContent = weatherDescription;
             })
             .catch(error => {
                 console.error('Error:', error);
-                const errorMessage = "An error occurred while fetching data. Check the console for details.";
-                ipResult.textContent = errorMessage;
-                locationResult.textContent = errorMessage;
-                weatherResult.textContent = errorMessage;
+                ipResult.textContent = 'Error fetching IP';
+                locationResult.textContent = 'Error fetching location';
+                weatherResult.textContent = 'Error fetching weather';
             });
     </script>
 </body>
