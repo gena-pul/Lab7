@@ -19,8 +19,6 @@
             color: white;
             padding: 20px;
             margin: 0;
-            border-top: 0;
-            border-radius: 0;
         }
 
         .container {
@@ -34,7 +32,6 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            text-align: center;
         }
 
         .label {
@@ -47,23 +44,11 @@
             color: red;
             font-weight: bold;
         }
-
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 24px;
-                padding: 15px;
-            }
-
-            .container {
-                font-size: 16px;
-                padding: 15px;
-            }
-        }
     </style>
 </head>
 <body>
-    <h1>Javascript and APIs</h1>
-    <h1><small>With basic knowledge of Javascript and APIs, I can find out the following:</small></h1>
+    <h1>JavaScript and APIs</h1>
+    <h2>With basic knowledge of JavaScript and APIs, I can find out the following:</h2>
     <div class="container" id="output">
         <p class="label">Public IP Address:</p>
         <p id="ip-result">Loading...</p>
@@ -80,66 +65,61 @@
         const locationResult = document.getElementById("location-result");
         const weatherResult = document.getElementById("weather-result");
 
-        fetch('https://api.ipify.org?format=json')
-            .then(response => {
-                console.log('IP Response:', response);
-                if (!response.ok) throw new Error('Failed to fetch IP');
-                return response.json();
-            })
-            .then(ipData => {
-                const ip = ipData.ip;
-                console.log('Public IP:', ip);
-                ipResult.textContent = ip;
-
-                // Fetch location using IP
-                return fetch(`https://ip-api.com/json/${ip}`);
-            })
-            .then(response => {
-                console.log('Location Response:', response);
-                if (!response.ok) throw new Error('Failed to fetch location');
-                return response.json();
-            })
-            .then(locationData => {
-                console.log('Location Data:', locationData);
-
-                if (locationData.status !== 'success') {
-                    throw new Error('Failed to retrieve location');
-                }
-
-                const city = locationData.city;
-                const country = locationData.country;
-
-                locationResult.textContent = `${city}, ${country}`;
-
-                // Fetch weather using location
-                const weatherApiKey = '524a4e7dd19165afe1880c716e00b368';
-                const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&units=metric&appid=${weatherApiKey}`;
-                
-                return fetch(weatherApiUrl);
-            })
-            .then(response => {
-                console.log('Weather Response:', response);
-                if (!response.ok) throw new Error('Failed to fetch weather');
-                return response.json();
-            })
-            .then(weatherData => {
-                console.log('Weather Data:', weatherData);
-
-                if (!weatherData.weather || !weatherData.weather.length) {
-                    throw new Error('Invalid weather data');
-                }
-
-                const weatherDescription = weatherData.weather[0].description;
-                weatherResult.textContent = weatherDescription;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-
-                // Display error messages
+        async function fetchPublicIP() {
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                if (!ipResponse.ok) throw new Error('Failed to fetch IP');
+                const ipData = await ipResponse.json();
+                ipResult.textContent = ipData.ip;
+                return ipData.ip;
+            } catch (error) {
+                console.error('Error fetching IP:', error);
                 ipResult.textContent = 'Error fetching IP';
+                throw error;
+            }
+        }
+
+        async function fetchLocation(ip) {
+            try {
+                const locationResponse = await fetch(`https://pro.ip-api.com/json/${ip}?key=YOUR_IP_API_KEY`);
+                if (!locationResponse.ok) throw new Error('Failed to fetch location');
+                const locationData = await locationResponse.json();
+                if (locationData.status !== 'success') throw new Error('Invalid location data');
+                locationResult.textContent = `${locationData.city}, ${locationData.country}`;
+                return locationData;
+            } catch (error) {
+                console.error('Error fetching location:', error);
                 locationResult.textContent = 'Error fetching location';
+                throw error;
+            }
+        }
+
+        async function fetchWeather(city, country) {
+            try {
+                const apiKey = '524a4e7dd19165afe1880c716e00b368';
+                const weatherResponse = await fetch(
+                    `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&units=metric&appid=${apiKey}`
+                );
+                if (!weatherResponse.ok) throw new Error('Failed to fetch weather');
+                const weatherData = await weatherResponse.json();
+                weatherResult.textContent = weatherData.weather[0].description;
+            } catch (error) {
+                console.error('Error fetching weather:', error);
                 weatherResult.textContent = 'Error fetching weather';
-            });
+            }
+        }
+
+        async function main() {
+            try {
+                const ip = await fetchPublicIP();
+                const locationData = await fetchLocation(ip);
+                await fetchWeather(locationData.city, locationData.country);
+            } catch (error) {
+                console.error('Error in main function:', error);
+            }
+        }
+
+        main();
     </script>
 </body>
 </html>
