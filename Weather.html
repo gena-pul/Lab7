@@ -81,11 +81,12 @@
 
         async function fetchLocation(ip) {
             try {
-                const locationResponse = await fetch(`https://ip-api.com/json/${ip}`);  // Changed to HTTPS
+                // Replace this with ipstack URL
+                const locationResponse = await fetch(`https://api.ipstack.com/${ip}?access_key=YOUR_ACCESS_KEY`);
                 if (!locationResponse.ok) throw new Error('Failed to fetch location');
                 const locationData = await locationResponse.json();
-                if (locationData.status !== 'success') throw new Error('Invalid location data');
-                locationResult.textContent = `${locationData.city}, ${locationData.country}`;
+                if (!locationData.city || !locationData.country_name) throw new Error('Invalid location data');
+                locationResult.textContent = `${locationData.city}, ${locationData.country_name}`;
                 return locationData;
             } catch (error) {
                 console.error('Error fetching location:', error);
@@ -115,7 +116,7 @@
                 if (!ip) return;
                 const locationData = await fetchLocation(ip);
                 if (!locationData) return;
-                await fetchWeather(locationData.city, locationData.country);
+                await fetchWeather(locationData.city, locationData.country_name);
             } catch (error) {
                 console.error('Error in main function:', error);
             }
