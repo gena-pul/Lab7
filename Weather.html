@@ -75,7 +75,7 @@
             } catch (error) {
                 console.error('Error fetching IP:', error);
                 ipResult.textContent = 'Error fetching IP';
-                throw error;
+                return null;
             }
         }
 
@@ -90,7 +90,7 @@
             } catch (error) {
                 console.error('Error fetching location:', error);
                 locationResult.textContent = 'Error fetching location';
-                throw error;
+                return null;
             }
         }
 
@@ -112,7 +112,9 @@
         async function main() {
             try {
                 const ip = await fetchPublicIP();
+                if (!ip) return;
                 const locationData = await fetchLocation(ip);
+                if (!locationData) return;
                 await fetchWeather(locationData.city, locationData.country);
             } catch (error) {
                 console.error('Error in main function:', error);
